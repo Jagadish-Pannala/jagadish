@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from app.chatbot import chat_with_bot
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -18,8 +19,9 @@ def chat(query: Query):
         return {"error": str(e)}
 
 # ✅ Serve frontend
+
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
 @app.get("/")
-def read_index():
+def serve_index():
     return FileResponse("frontend/index.html")

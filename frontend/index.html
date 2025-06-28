@@ -1,12 +1,114 @@
-<script>
-  async function send() {
-    let q = document.getElementById('msg').value;
-    let res = await fetch('/chat', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: q})
-    });
-    let data = await res.json();
-    document.getElementById('reply').innerText = data.response || data.error;
-  }
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Paves Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f9f9f9;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .user {
+      font-weight: bold;
+      color: #2a5dba;
+    }
+    .bot {
+      color: #444;
+      margin-left: 20px;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      margin-left: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <img src="/static/paves_logo.png" alt="Paves Logo" width="150">
+    <h2>Welcome to Paves Chatbot</h2>
+  </div>
+
+  <div class="chat-container" id="chatContainer">
+    <div class="input-block">
+      <input placeholder="Ask your question" />
+      <button onclick="send(this)">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function send(button) {
+      const input = button.previousElementSibling;
+      const question = input.value.trim();
+      if (!question) return;
+
+      // Disable input after sending
+      input.disabled = true;
+      button.disabled = true;
+
+      const chatContainer = document.getElementById('chatContainer');
+
+      // Show user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message user';
+      userMsg.textContent = "You: " + question;
+      chatContainer.appendChild(userMsg);
+
+      // Show "typing..." first
+      const botMsg = document.createElement('div');
+      botMsg.className = 'message bot';
+      botMsg.textContent = "Bot is typing...";
+      chatContainer.appendChild(botMsg);
+
+      // Fetch in background
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: question })
+      });
+      const data = await res.json();
+
+      // Replace typing message with actual response
+      botMsg.textContent = "Bot: " + (data.response || data.error || "No response");
+
+
+      // Add next input field
+      const newInputBlock = document.createElement('div');
+      newInputBlock.className = 'input-block';
+      newInputBlock.innerHTML = `
+        <input placeholder="Ask another question" />
+        <button onclick="send(this)">Send</button>
+      `;
+      chatContainer.appendChild(newInputBlock);
+
+      // Scroll to bottom
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
