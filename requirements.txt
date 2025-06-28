@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+python-docx
+requests
+
+# LangChain ecosystem (modular & updated)
+langchain
+langchain-community
+langchain-huggingface
+
+# Embeddings model
+sentence-transformers
+
+# Vector store
+chromadb
