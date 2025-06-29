@@ -49,26 +49,28 @@
 <body>
 
   <div class="logo">
-    <img src="/static/paves_logo.png" alt="Paves Logo" width="150">
+    <img src="/static/paves_logo.ico" alt="Paves Logo" width="150">
     <h2>Welcome to Paves Chatbot</h2>
   </div>
 
   <div class="chat-container" id="chatContainer">
-    <div class="input-block">
-      <input placeholder="Ask your question" />
-      <button onclick="send(this)">Send</button>
+    <div class="input-block" id="inputBlock">
+      <input placeholder="Ask your question" id="chatInput" />
+      <button onclick="send()">Send</button>
     </div>
   </div>
 
   <script>
-    async function send(button) {
-      const input = button.previousElementSibling;
+    let chatEnded = false;
+
+    async function send() {
+      if (chatEnded) return;
+
+      const input = document.getElementById('chatInput');
       const question = input.value.trim();
       if (!question) return;
 
-      // Disable input after sending
       input.disabled = true;
-      button.disabled = true;
 
       const chatContainer = document.getElementById('chatContainer');
 
@@ -78,13 +80,13 @@
       userMsg.textContent = "You: " + question;
       chatContainer.appendChild(userMsg);
 
-      // Show "typing..." first
+      // Show "typing..."
       const botMsg = document.createElement('div');
       botMsg.className = 'message bot';
       botMsg.textContent = "Bot is typing...";
       chatContainer.appendChild(botMsg);
 
-      // Fetch in background
+      // Fetch reply
       const res = await fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,20 +94,25 @@
       });
       const data = await res.json();
 
-      // Replace typing message with actual response
+      // Replace "typing..." with bot's reply
       botMsg.textContent = "Bot: " + (data.response || data.error || "No response");
 
+      if (data.end) {
+        chatEnded = true;
+        input.placeholder = "Chat ended.";
+      } else {
+        // Add new input block
+        const newBlock = document.createElement('div');
+        newBlock.className = 'input-block';
+        newBlock.innerHTML = `
+          <input placeholder="Ask another question" id="chatInput" />
+          <button onclick="send()">Send</button>
+        `;
+        document.getElementById('inputBlock').remove(); // remove old input
+        newBlock.id = 'inputBlock';
+        chatContainer.appendChild(newBlock);
+      }
 
-      // Add next input field
-      const newInputBlock = document.createElement('div');
-      newInputBlock.className = 'input-block';
-      newInputBlock.innerHTML = `
-        <input placeholder="Ask another question" />
-        <button onclick="send(this)">Send</button>
-      `;
-      chatContainer.appendChild(newInputBlock);
-
-      // Scroll to bottom
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
   </script>
