@@ -3,10 +3,10 @@ uvicorn
 python-docx
 requests
 
-# LangChain ecosystem (modular & updated)
+# LangChain ecosystem
 langchain
 langchain-community
-langchain-huggingface
+langsmith
 
 # Embeddings model
 sentence-transformers
